@@ -4,6 +4,7 @@ package in.manikanta.moneymanager.controller;
 import in.manikanta.moneymanager.dto.AuthDTO;
 import in.manikanta.moneymanager.dto.ProfileDTO;
 import in.manikanta.moneymanager.service.ProfileService;
+import jakarta.servlet.http.PushBuilder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -38,7 +39,7 @@ public class ProfileController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Map<String, Object>> login(@RequestBody AuthDTO authDTO){
+    public ResponseEntity<Map<String, Object>> login(@RequestBody AuthDTO authDTO, PushBuilder pushBuilder){
         try{
             if(!profileService.isAccountActive(authDTO.getEmail())) {
 
@@ -53,5 +54,11 @@ public class ProfileController {
                   "message", e.getMessage()
             ));
         }
+
+
+    }
+    @GetMapping("/test")
+    public String test(){
+        return "Test succesful";
     }
 }

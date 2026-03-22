@@ -6,9 +6,6 @@ import in.manikanta.moneymanager.entity.ProfileEntity;
 import in.manikanta.moneymanager.repository.ProfileRepository;
 import in.manikanta.moneymanager.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Profile;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -27,8 +24,6 @@ public class ProfileService {
     private  final EmailService emailService;
 
     private final PasswordEncoder passwordEncoder;
-
-    private final AuthenticationManager authenticationManager;
 
     private final JwtUtil jwtUtil;
 
@@ -101,13 +96,12 @@ public class ProfileService {
     }
 
     public ProfileDTO getPublicProfile(String email){
-
-        ProfileEntity currentUser=null;
+        ProfileEntity currentUser;
         if(email == null){
-           currentUser = getCurrentProfile();
+            currentUser = getCurrentProfile();
         }
         else{
-            profileRepository.findByEmail(email)
+            currentUser = profileRepository.findByEmail(email)
                     .orElseThrow(() -> new UsernameNotFoundException("Profile not found with email: " + email));
         }
         return ProfileDTO.builder()
@@ -121,16 +115,28 @@ public class ProfileService {
     }
 
     public Map<String, Object> authenticateAndGenerateToken(AuthDTO authDTO) {
+        ProfileEntity profile = profileRepository.findByEmail(authDTO.getEmail())
+                .orElseThrow(() -> new RuntimeException("Invalid email or Password"));
+
         try {
-            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authDTO.getEmail(), authDTO.getPassword()));
+            boolean passwordMatches = passwordEncoder.matches(authDTO.getPassword(), profile.getPassword());
 
-            //Genarate token
+            // Allow existing legacy plain-text passwords once, then upgrade them to BCrypt.
+            if (!passwordMatches && authDTO.getPassword().equals(profile.getPassword())) {
+                profile.setPassword(passwordEncoder.encode(authDTO.getPassword()));
+                profileRepository.save(profile);
+                passwordMatches = true;
+            }
 
-            String token = jwtUtil.generateToken(authDTO.getEmail());
+            if (!passwordMatches) {
+                throw new RuntimeException("Invalid email or Password");
+            }
+
+            String token = jwtUtil.generateToken(profile.getEmail());
 
             return Map.of(
-                    "token", "token",
-                    "user", getPublicProfile(authDTO.getEmail())
+                    "token", token,
+                    "user", toDTO(profile)
             );
 
         }
