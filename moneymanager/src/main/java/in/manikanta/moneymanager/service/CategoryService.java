@@ -52,6 +52,20 @@ public class CategoryService {
         return entities.stream().map(this::toDTO).toList();
     }
 
+    public CategoryDTO updateCategory(Long categoryId, CategoryDTO dto){
+        ProfileEntity profile = profileService.getCurrentProfile();
+        CategoryEntity existingCategory = categoryRepository.findByIdAndProfileId(categoryId, profile.getId())
+                .orElseThrow( () -> new RuntimeException("Category not found"));
+
+        existingCategory.setName(dto.getName());
+        existingCategory.setIcon(dto.getIcon());
+
+        existingCategory=categoryRepository.save(existingCategory);
+
+        return toDTO(existingCategory);
+
+    }
+
 
     private CategoryEntity toEntity(CategoryDTO categoryDTO, ProfileEntity profile){
         return CategoryEntity.builder()
