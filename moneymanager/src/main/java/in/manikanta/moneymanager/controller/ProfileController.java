@@ -59,6 +59,7 @@ public class ProfileController {
     }
     @GetMapping("/test")
     public String test(){
+        System.out.println("Hell maniyadav");
         return "Test succesful";
     }
 }

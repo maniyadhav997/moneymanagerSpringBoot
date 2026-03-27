@@ -7,9 +7,11 @@ import in.manikanta.moneymanager.entity.ProfileEntity;
 import in.manikanta.moneymanager.repository.CategoryRepository;
 import in.manikanta.moneymanager.repository.ExpenseRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import javax.swing.text.html.parser.Entity;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -49,6 +51,22 @@ public class ExpenseService {
         return list.stream().map(this::toDTO).toList();
     }
 
+    //Get latest 5 expenses of current user
+
+    public List<ExpenseDTO> getLatest5ExpensesForCurrentUser(){
+        ProfileEntity profile=profileService.getCurrentProfile();
+        List<ExpenseEntity> list =    expenseRepository.findTop5ByProfileIdOrderByDateDesc(profile.getId());
+        return list.stream().map(this::toDTO).toList();
+    }
+
+    //Get totoal expenses of current user
+    public BigDecimal getTotalExpenseForCurrentUset(){
+        ProfileEntity profile = profileService.getCurrentProfile();
+       BigDecimal total = expenseRepository.findTotalExpenseByProfileId(profile.getId());
+       return total != null ? total: BigDecimal.ZERO;
+    }
+
+
     //delete expenses by current user id
 
     public void deleteExpense(Long expenseId){
@@ -60,6 +78,15 @@ public class ExpenseService {
             throw new RuntimeException("Unauthorized access");
         }
         expenseRepository.delete(entity);
+    }
+
+    //filter expenses
+    public List<ExpenseDTO> filterExpenses(LocalDate startDate, LocalDate endDate, String keyword, Sort sort){
+
+        ProfileEntity profile = profileService.getCurrentProfile();
+        List<ExpenseEntity> list = expenseRepository.findByProfileIdAndDateBetweenAndNameContainingIgnoreCase(profile.getId(), startDate, endDate, keyword, sort);
+
+        return list.stream().map(this :: toDTO).toList();
     }
 
     private ExpenseEntity toEnity(ExpenseDTO expenseDTO, ProfileEntity profile, CategoryEntity category) {
