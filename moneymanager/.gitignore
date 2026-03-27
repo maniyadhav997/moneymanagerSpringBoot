@@ -49,6 +49,5 @@ build/
 
 
 # Application secrets
-application.properties
 application.yml
 application-prod.properties
