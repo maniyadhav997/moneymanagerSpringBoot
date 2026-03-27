@@ -50,4 +50,3 @@ build/
 
 # Application secrets
 application.yml
-application-prod.properties
