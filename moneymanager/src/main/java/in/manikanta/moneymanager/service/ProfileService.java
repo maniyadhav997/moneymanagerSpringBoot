@@ -6,6 +6,7 @@ import in.manikanta.moneymanager.entity.ProfileEntity;
 import in.manikanta.moneymanager.repository.ProfileRepository;
 import in.manikanta.moneymanager.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -27,6 +28,9 @@ public class ProfileService {
 
     private final JwtUtil jwtUtil;
 
+    @Value("${app.activation.url:http://localhost:8080}")
+    private String activationURL;
+
 
     public ProfileDTO registerProfile(ProfileDTO profileDTO){
 
@@ -37,7 +41,7 @@ public class ProfileService {
 
         //send activaton link
 
-        String activationaLink = "http://localhost:8080/api/v1.0/activate?token=" + newProfile.getActivationToken();
+        String activationaLink = activationURL+"/api/v1.0/activate?token=" + newProfile.getActivationToken();
         String subject="Activate your Money Manager account";
 
         String body = "Click on the following link to activate your account:" + activationaLink;
