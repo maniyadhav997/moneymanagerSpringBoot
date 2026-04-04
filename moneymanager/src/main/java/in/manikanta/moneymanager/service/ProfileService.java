@@ -60,6 +60,7 @@ public class ProfileService {
                 .password(passwordEncoder.encode(profileDTO.getPassword()))
                 .createdAt(profileDTO.getCreatedAt())
                 .updatedAt(profileDTO.getUpdatedAt())
+                .profileImageUrl(profileDTO.getProfileImageUrl())
                 .build();
     }
 
