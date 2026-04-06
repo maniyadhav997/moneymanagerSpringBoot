@@ -62,4 +62,11 @@ public class ProfileController {
         System.out.println("Hell maniyadav");
         return "Test succesful";
     }
+
+    @GetMapping("/profile")
+    public ResponseEntity<ProfileDTO> getPublicProfile(){
+         ProfileDTO profileDTO = profileService.getPublicProfile(null);
+
+         return  ResponseEntity.ok(profileDTO);
+    }
 }
