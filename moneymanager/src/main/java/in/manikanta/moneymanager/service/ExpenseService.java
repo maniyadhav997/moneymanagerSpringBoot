@@ -100,6 +100,16 @@ public class ExpenseService {
 
     }
 
+    // Retrieves all expenses for current month/based on the start date and end date
+    public List<ExpenseDTO> getCurrentMonthExpensesForCurrentUser() {
+        ProfileEntity profile = profileService.getCurrentProfile();
+        LocalDate now = LocalDate.now();
+        LocalDate startDate = now.withDayOfMonth(1);
+        LocalDate endDate = now.withDayOfMonth(now.lengthOfMonth());
+        List<ExpenseEntity> list = expenseRepository.findByProfileIdAndDateBetween(profile.getId(), startDate, endDate);
+        return list.stream().map(this::toDTO).toList();
+    }
+
     private ExpenseEntity toEnity(ExpenseDTO expenseDTO, ProfileEntity profile, CategoryEntity category) {
         return ExpenseEntity.builder()
                 .name(expenseDTO.getName())
